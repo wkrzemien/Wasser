@@ -1,6 +1,8 @@
-"""Wasser module is created for providing https requests for Python 2.6,
+"""
+   Wasser module is created for providing https requests for Python 2.6,
    where you don't have pyOpenSSL, cryptography and SSL wrapper for socket.
-   For using this module, you need to install OpenSSL"""
+   For using this module, you need to install OpenSSL
+"""
 
 import json
 from subprocess import Popen, PIPE
@@ -10,14 +12,18 @@ from urlparse import urlparse
 class Wasser:
     """Class to create https requests for Python 2.6"""
     def __init__(self, user_cert, user_key):
-        """For creating https request you need to provide path for your
-        certificate and key"""
+        """
+        For creating https request you need to provide path for your
+        certificate and key
+        """
         self.user_cert = user_cert
         self.user_key = user_key
     def get(self, url):
-        """GET request, provide fully qualified url
+        """
+           GET request, provide fully qualified url
            as example - https://localhost:1027/
-           not localhost:1027/"""
+           not localhost:1027/
+        """
         parsed_url = urlparse(url)
         host = parsed_url.netloc
         path = parsed_url.path
@@ -29,9 +35,11 @@ class Wasser:
         ind = out.find('HTTP/1.1')
         return out[ind:]
     def post(self, url, message):
-        """POST request, provide url and message to post
+        """
+           POST request, provide url and message to post
            if type of message is dict -> request will post json
-           else request will post text/plain"""
+           else request will post text/plain
+        """
         parsed_url = urlparse(url)
         host = parsed_url.netloc
         path = parsed_url.path
@@ -43,7 +51,6 @@ class Wasser:
             json_string = json.dumps(message)
             message_len = len(json_string)
             request_body = "POST {0} HTTP/1.1\nContent-Type: application/json\nContent-Length: {1}\n\n{2}".format(path, message_len, json_string)
-            print request_body
         else:
             message = str(message)
             message_len = len(message)
