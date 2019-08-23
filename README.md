@@ -2,8 +2,8 @@ Module wasser
 =============
 
 Wasser module is created for providing https requests for Python 2.6,
-where you don't have pyOpenSSL, cryptography and SSL wrapper for socket.
-For using this module, you need to install OpenSSL
+where you don't have pyOpenSSL, cryptography.
+Instead this module uses ssl wrapped sockets
 
 
 Classes
