@@ -28,17 +28,26 @@ class Wasser:
         out = response_of_process[0]
         ind = out.find('HTTP/1.1')
         return out[ind:]
-    def post_json(self, url, json_dict):
-        """POST request, provide url and json to post"""
+    def post(self, url, message):
+        """POST request, provide url and message to post
+           if type of message is dict -> request will post json
+           else request will post text/plain"""
         parsed_url = urlparse(url)
         host = parsed_url.netloc
         path = parsed_url.path
         command = 'openssl s_client -cert {0} -key {1} -connect {2}'.format(self.user_cert, self.user_key, host)
         proc = Popen(command.split(' '), stdin=PIPE, stdout=PIPE)
-        json_string = json.dumps(json_dict)
-        json_len = len(json_string)
-        request_body = 'POST {0} HTTP/1.1\nContent-Type: application/json\nContent-Length: {1}\n\n{2}'.format(path, json_len, json_string)
-        print request_body
+        if message is None:
+            raise Exception("You didn't provide any data to post, please write message, or json")
+        elif isinstance(message, dict):
+            json_string = json.dumps(message)
+            message_len = len(json_string)
+            request_body = "POST {0} HTTP/1.1\nContent-Type: application/json\nContent-Length: {1}\n\n{2}".format(path, message_len, json_string)
+            print request_body
+        else:
+            message = str(message)
+            message_len = len(message)
+            request_body = "POST {0} HTTP/1.1\nContent-Type: text/plain\nContent-Length: {1}\n\n{2}".format(path, message_len, message)
         response_of_process = proc.communicate(input=request_body)
         out = response_of_process[0]
         ind = out.find('HTTP/1.1')
@@ -47,8 +56,11 @@ class Wasser:
 
 if __name__ == '__main__':
     test_json = {'wasser':'stein'}
+    test_string = 23
     new_request = Wasser('user.crt', 'user.key')
     print '\nPOST request\n'
-    print new_request.post_json('https://localhost:1027/', test_json)
+    print new_request.post('https://localhost:1027/', test_json)
+    print '\nPOST request\n'
+    print new_request.post('https://localhost:1027/', test_string)
     print '\nGET request\n'
     print new_request.get('https://localhost:1027/')
