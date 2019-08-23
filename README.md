@@ -7,12 +7,60 @@ For using this module, you need to install OpenSSL
 
 Classes
 -------
+Response 
+
+Class for representation of server response, and manipulating data in it
+
+Ancestors (in MRO)
+------------------
+wasser.Response
+
+Instance variables
+------------------
+
+head - headers of http response
+
+body - body of http response
+
+code - code of http response
+
+date - date of http response
+
+content_length - length of body 
+
+content_type - type of body
+
+encoding - encoding of body
+
+server - type of server, from which we get response
+
+Methods
+-------
+```python
+__init__(self, data)
+```
+
+    Creating and parsing response on
+    headers,
+    body,
+    code of response,
+    date of response,
+    content_length,
+    content_type,
+    encoding,
+    server
+
+
+
 Wasser 
     Class to create https requests for Python 2.6
 
 
 Instance variables
 ------------------
+
+ca - path to your CA certificate for checking server certificate
+
 user_cert - path to your certificate for connection
 
 user_key - path to your key for connection
