@@ -1,23 +1,63 @@
 """
    Wasser module is created for providing https requests for Python 2.6,
-   where you don't have pyOpenSSL, cryptography and SSL wrapper for socket.
-   For using this module, you need to install OpenSSL
+   where you don't have pyOpenSSL, cryptography.
+   Here  SSL wrapper for socket is used.
 """
 
-import json
-from subprocess import Popen, PIPE
+import json, socket, ssl, re
 from urlparse import urlparse
 
 
+class Response:
+    """Class for representation of server response, and manipulating data in it"""
+    def __init__(self, data):
+        """
+        Creating and parsing response on
+        headers,
+        body,
+        code of response,
+        date of response,
+        content_length,
+        content_type,
+        encoding,
+        server
+        """
+        ind_of_body = data.find('\r\n\r\n')
+        self.head = data[:ind_of_body]
+        self.body = data[ind_of_body+4:]
+        self.code = re.search('(.*)\nDate', self.head).group(1)
+        self.date = re.search('\nDate: (.*)\n', self.head).group(1)
+        self.content_type = re.search('\nContent-Type:(.*);', self.head).group(1)
+        self.content_length = re.search('\nContent-Length:(.*)\n', self.head).group(1)
+        self.encoding = re.search('charset=(.*)\n', self.head).group(1)
+        self.server = re.search('Server:(.*)', self.head).group(1)
+    def __str__(self):
+        return "Headers:\n{0}\nBody:\n{1}".format(self.head, self.body)
 class Wasser:
     """Class to create https requests for Python 2.6"""
-    def __init__(self, user_cert, user_key):
+    def __init__(self, user_cert, user_key, ca_cert):
         """
         For creating https request you need to provide path for your
-        certificate and key
+        certificate and key and ca_cert for checking certificate of server
         """
         self.user_cert = user_cert
         self.user_key = user_key
+        self.ca = ca_cert
+    def create(self):
+        """
+        Creating socket for connecting and wrapping him with ssl
+        """
+        unwrap_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if isinstance(self.ca, str):
+            ssl_socket = ssl.wrap_socket(unwrap_socket,
+                                     certfile=self.user_cert,
+                                     keyfile=self.user_key,
+                                     ca_certs=self.ca,
+                                     cert_reqs=ssl.CERT_REQUIRED)
+        else:
+            raise Exception("ca_cert isn't provided")
+        return ssl_socket
+
     def get(self, url):
         """
            GET request, provide fully qualified url
@@ -25,26 +65,42 @@ class Wasser:
            not localhost:1027/
         """
         parsed_url = urlparse(url)
-        host = parsed_url.netloc
+        location = parsed_url.netloc
         path = parsed_url.path
-        command = 'openssl s_client -cert {0} -key {1} -connect {2}'.format(self.user_cert, self.user_key, host)
-        proc = Popen(command.split(' '), stdin=PIPE, stdout=PIPE)
+        index_of_colon = location.find(':')
+        host = location[:index_of_colon]
+        port = int(location[index_of_colon+1:])
+
+        ssl_socket = self.create()
+
+        ssl_socket.connect((host, port))
+
         request_body = 'GET {0} HTTP/1.1\nAccept: */*\n\n'.format(path)
-        response_of_process = proc.communicate(input=request_body)
-        out = response_of_process[0]
-        ind = out.find('HTTP/1.1')
-        return out[ind:]
+
+        ssl_socket.write(request_body)
+
+        data = ssl_socket.read()
+
+        ssl_socket.close()
+        return Response(data)
     def post(self, url, message):
         """
            POST request, provide url and message to post
            if type of message is dict -> request will post json
            else request will post text/plain
         """
+
+        ssl_socket = self.create()
+
         parsed_url = urlparse(url)
-        host = parsed_url.netloc
+        location = parsed_url.netloc
         path = parsed_url.path
-        command = 'openssl s_client -cert {0} -key {1} -connect {2}'.format(self.user_cert, self.user_key, host)
-        proc = Popen(command.split(' '), stdin=PIPE, stdout=PIPE)
+        index_of_colon = location.find(':')
+        host = location[:index_of_colon]
+        port = int(location[index_of_colon+1:])
+
+        ssl_socket.connect((host, port))
+
         if message is None:
             raise Exception("You didn't provide any data to post, please write message, or json")
         elif isinstance(message, dict):
@@ -55,19 +111,21 @@ class Wasser:
             message = str(message)
             message_len = len(message)
             request_body = "POST {0} HTTP/1.1\nContent-Type: text/plain\nContent-Length: {1}\n\n{2}".format(path, message_len, message)
-        response_of_process = proc.communicate(input=request_body)
-        out = response_of_process[0]
-        ind = out.find('HTTP/1.1')
-        return out[ind:]
+
+        ssl_socket.write(request_body)
+
+        data = ssl_socket.read()
+
+        ssl_socket.close()
+        return Response(data)
 
 
 if __name__ == '__main__':
     test_json = {'wasser':'stein'}
-    test_string = 23
-    new_request = Wasser('user.crt', 'user.key')
+    new_request = Wasser('user.crt', 'user.key', 'CAcert.pem')
     print '\nPOST request\n'
     print new_request.post('https://localhost:1027/', test_json)
     print '\nPOST request\n'
-    print new_request.post('https://localhost:1027/', test_string)
+    print new_request.post('https://localhost:1027/', 'Hello server')
     print '\nGET request\n'
     print new_request.get('https://localhost:1027/')
