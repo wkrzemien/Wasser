@@ -1,22 +1,23 @@
 Module wasser
--------------
+=============
+
 Wasser module is created for providing https requests for Python 2.6,
 where you don't have pyOpenSSL, cryptography and SSL wrapper for socket.
 For using this module, you need to install OpenSSL
 
 
 Classes
--------
+=======
 Response 
-
+--------
 Class for representation of server response, and manipulating data in it
 
-Ancestors (in MRO)
-------------------
+### Ancestors (in MRO)
+
 wasser.Response
 
-Instance variables
-------------------
+### Instance variables
+
 
 head - headers of http response
 
@@ -34,30 +35,30 @@ encoding - encoding of body
 
 server - type of server, from which we get response
 
-Methods
--------
+### Methods
 ```python
 __init__(self, data)
 ```
 
-    Creating and parsing response on
-    headers,
-    body,
-    code of response,
-    date of response,
-    content_length,
-    content_type,
-    encoding,
-    server
+Creating and parsing response on
+-   headers,
+-   body,
+-   code of response,
+-   date of response,
+-   content_length,
+-   content_type,
+-   encoding,
+-   server
 
 
 
-Wasser 
-    Class to create https requests for Python 2.6
+Wasser
+------
+
+Class to create https requests for Python 2.6
 
 
-Instance variables
-------------------
+### Instance variables
 
 ca - path to your CA certificate for checking server certificate
 
@@ -65,12 +66,12 @@ user_cert - path to your certificate for connection
 
 user_key - path to your key for connection
 
-Methods
--------
+### Methods
 ```python
 __init__(self, user_cert, user_key)
 ```
 For creating https request you need to provide path for your certificate and key
+
 ```python
 get(self, url)
 ```
@@ -84,8 +85,7 @@ post(self, url, message)
 POST request, provide url(as in ```get(self, url)``` method) and message to post
 if type of message is dict -> request Content-Type will be application/json, else request will post text/plain
 
-Example of usage
-----------------
+### Example of usage
 ```python
 from wasser import Wasser
 request = Wasser('test.crt', 'test.key')
