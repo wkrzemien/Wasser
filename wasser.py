@@ -23,7 +23,7 @@ class Wasser:
         path = parsed_url.path
         command = 'openssl s_client -cert {0} -key {1} -connect {2}'.format(self.user_cert, self.user_key, host)
         proc = Popen(command.split(' '), stdin=PIPE, stdout=PIPE)
-        request_body = 'GET {0} HTTP/1.1\nAccept: text/plain\n\n'.format(path)
+        request_body = 'GET {0} HTTP/1.1\nAccept: */*\n\n'.format(path)
         response_of_process = proc.communicate(input=request_body)
         out = response_of_process[0]
         ind = out.find('HTTP/1.1')
