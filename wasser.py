@@ -40,6 +40,12 @@ class Wasser:
         For creating https request you need to provide path for your
         certificate and key and ca_cert for checking certificate of server
         """
+        for filename in [user_cert, user_key, ca_cert]:
+            try:
+                with open(filename) as test_file:
+                    print ('%s exists' %  filename)
+            except IOError:
+                raise IOError('This %s cannot be accessed' %  filename)
         self.user_cert = user_cert
         self.user_key = user_key
         self.ca = ca_cert
@@ -82,7 +88,7 @@ class Wasser:
         data = ssl_socket.read()
 
         ssl_socket.close()
-        return Response(data)
+        return data #Response(data)
     def post(self, url, message):
         """
            POST request, provide url and message to post
@@ -117,15 +123,15 @@ class Wasser:
         data = ssl_socket.read()
 
         ssl_socket.close()
-        return Response(data)
+        return data #Response(data)
 
 
 if __name__ == '__main__':
     test_json = {'wasser':'stein'}
-    new_request = Wasser('user.crt', 'user.key', 'CAcert.pem')
+    new_request = Wasser('/certs/user.crt', '/certs/user.key', '/certs/CAcert.pem')
     print '\nPOST request\n'
     print new_request.post('https://localhost:1027/', test_json)
-    print '\nPOST request\n'
-    print new_request.post('https://localhost:1027/', 'Hello server')
+    #print '\nPOST request\n'
+    #print new_request.post('https://localhost:1027/', 'Hello server')
     print '\nGET request\n'
     print new_request.get('https://localhost:1027/')
