@@ -128,7 +128,7 @@ class Wasser:
 
 if __name__ == '__main__':
     test_json = {'wasser':'stein'}
-    new_request = Wasser('/certs/user.crt', '/certs/user.key', '/certs/CAcert.pem')
+    new_request = Wasser('certs/user.crt', 'certs/user.key', 'certs/CAcert.pem')
     print '\nPOST request\n'
     print new_request.post('https://localhost:1027/', test_json)
     #print '\nPOST request\n'
