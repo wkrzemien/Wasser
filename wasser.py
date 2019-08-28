@@ -79,16 +79,23 @@ class Wasser:
 
         ssl_socket = self.create()
 
-        ssl_socket.connect((host, port))
+        try:
+            ssl_socket.connect((host, port))
 
-        request_body = 'GET {0} HTTP/1.1\nAccept: */*\n\n'.format(path)
+            request_body = 'GET {0} HTTP/1.1\nAccept: */*\n\n'.format(path)
 
-        ssl_socket.write(request_body)
+            ssl_socket.write(request_body)
 
-        data = ssl_socket.read()
+            data = ssl_socket.read()
 
-        ssl_socket.close()
-        return data #Response(data)
+            ssl_socket.close()
+
+            return data #Response(data)
+        except ssl.SSLError as e:
+            print 'Problem with connecting to this url:'
+            print url
+            print 'Problem:'
+            print e
     def post(self, url, message):
         """
            POST request, provide url and message to post
@@ -104,34 +111,44 @@ class Wasser:
         index_of_colon = location.find(':')
         host = location[:index_of_colon]
         port = int(location[index_of_colon+1:])
+        
+        try:
+            ssl_socket.connect((host, port))
 
-        ssl_socket.connect((host, port))
+            if message is None:
+                raise Exception("You didn't provide any data to post, please write message, or json")
+            elif isinstance(message, dict):
+                json_string = json.dumps(message)
+                message_len = len(json_string)
+                request_body = "POST {0} HTTP/1.1\nContent-Type: application/json\nContent-Length: {1}\n\n{2}".format(path, message_len, json_string)
+            else:
+                message = str(message)
+                message_len = len(message)
+                request_body = "POST {0} HTTP/1.1\nContent-Type: text/plain\nContent-Length: {1}\n\n{2}".format(path, message_len, message)
 
-        if message is None:
-            raise Exception("You didn't provide any data to post, please write message, or json")
-        elif isinstance(message, dict):
-            json_string = json.dumps(message)
-            message_len = len(json_string)
-            request_body = "POST {0} HTTP/1.1\nContent-Type: application/json\nContent-Length: {1}\n\n{2}".format(path, message_len, json_string)
-        else:
-            message = str(message)
-            message_len = len(message)
-            request_body = "POST {0} HTTP/1.1\nContent-Type: text/plain\nContent-Length: {1}\n\n{2}".format(path, message_len, message)
+            ssl_socket.write(request_body)
 
-        ssl_socket.write(request_body)
+            data = ssl_socket.read()
 
-        data = ssl_socket.read()
-
-        ssl_socket.close()
-        return data #Response(data)
+            ssl_socket.close()
+            return data #Response(data)
+        except ssl.SSLError as e:
+            print 'Problem with connecting to this url:'
+            print url
+            print 'Problem:'
+            print e
 
 
 if __name__ == '__main__':
     test_json = {'wasser':'stein'}
     new_request = Wasser('certs/user.crt', 'certs/user.key', 'certs/CAcert.pem')
-    print '\nPOST request\n'
-    print new_request.post('https://localhost:1027/', test_json)
+    fake_request = Wasser('certs/fake_user.crt', 'certs/fake_user.key',
+                          'certs/CA_fake_cert.pem')
+    #print '\nPOST request\n'
+    #print new_request.post('https://localhost:1027/', test_json)
     #print '\nPOST request\n'
     #print new_request.post('https://localhost:1027/', 'Hello server')
-    print '\nGET request\n'
+    print '\nGET request, normal certificate\n'
     print new_request.get('https://localhost:1027/')
+    print '\nGET request, fake certificate\n'
+    print fake_request.get('https://localhost:1027/')
