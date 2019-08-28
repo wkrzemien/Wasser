@@ -68,7 +68,7 @@ user_key - path to your key for connection
 
 ### Methods
 ```python
-__init__(self, user_cert, user_key)
+__init__(self, user_cert, user_key, ca)
 ```
 For creating https request you need to provide path for your certificate and key
 
@@ -88,7 +88,7 @@ if type of message is dict -> request Content-Type will be application/json, els
 ### Example of usage
 ```python
 from wasser import Wasser
-request = Wasser('test.crt', 'test.key')
+request = Wasser('test.crt', 'test.key', 'CAtest.crt')
 get_response = request.get('https://example.com/')
 print get_response
 text_message = 'Hello'
