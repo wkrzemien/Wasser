@@ -25,7 +25,7 @@ class SimpleServer(object):
             try:
                 self.handle()
             except KeyboardInterrupt:
-                server.close()
+                self.close()
                 print '\nConnection closed'
                 sys.exit()
 
