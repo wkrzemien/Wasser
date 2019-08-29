@@ -70,8 +70,6 @@ class SimpleServer(object):
 
 class TestServer(SimpleServer):
     """Server for tests"""
-    def __init__(self, *args, **kwargs):
-        super(TestServer, self).__init__(*args, **kwargs)
     def get(self, path):
         if path == '/':
             response = """HTTP/1.0 200 OK

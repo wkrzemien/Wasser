@@ -4,11 +4,14 @@
    Here  SSL wrapper for socket is used.
 """
 
-import json, socket, ssl, re
+import json
+import socket
+import ssl
+import re
 from urlparse import urlparse
 
 
-class Response:
+class Response(object):
     """Class for representation of server response, and manipulating data in it"""
     def __init__(self, data):
         """
@@ -33,7 +36,7 @@ class Response:
         self.server = re.search('Server:(.*)', self.head).group(1)
     def __str__(self):
         return "Headers:\n{0}\nBody:\n{1}".format(self.head, self.body)
-class Wasser:
+class Wasser(object):
     """Class to create https requests for Python 2.6"""
     def __init__(self, user_cert, user_key, ca_cert):
         """
@@ -43,23 +46,23 @@ class Wasser:
         for filename in [user_cert, user_key, ca_cert]:
             try:
                 with open(filename) as test_file:
-                    print ('%s exists' %  filename)
+                    print '{0} exists'.format(filename)
             except IOError:
                 raise IOError('This %s cannot be accessed' %  filename)
         self.user_cert = user_cert
         self.user_key = user_key
-        self.ca = ca_cert
+        self.ca_cert = ca_cert
     def create(self):
         """
         Creating socket for connecting and wrapping him with ssl
         """
         unwrap_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        if isinstance(self.ca, str):
+        if isinstance(self.ca_cert, str):
             ssl_socket = ssl.wrap_socket(unwrap_socket,
-                                     certfile=self.user_cert,
-                                     keyfile=self.user_key,
-                                     ca_certs=self.ca,
-                                     cert_reqs=ssl.CERT_REQUIRED)
+                                         certfile=self.user_cert,
+                                         keyfile=self.user_key,
+                                         ca_certs=self.ca_cert,
+                                         cert_reqs=ssl.CERT_REQUIRED)
         else:
             raise Exception("ca_cert isn't provided")
         return ssl_socket
@@ -91,11 +94,11 @@ class Wasser:
             ssl_socket.close()
 
             return data #Response(data)
-        except ssl.SSLError as e:
+        except ssl.SSLError as error:
             print 'Problem with connecting to this url:'
             print url
             print 'Problem:'
-            print e
+            print error
     def post(self, url, message):
         """
            POST request, provide url and message to post
@@ -111,7 +114,7 @@ class Wasser:
         index_of_colon = location.find(':')
         host = location[:index_of_colon]
         port = int(location[index_of_colon+1:])
-        
+
         try:
             ssl_socket.connect((host, port))
 
@@ -132,11 +135,11 @@ class Wasser:
 
             ssl_socket.close()
             return data #Response(data)
-        except ssl.SSLError as e:
+        except ssl.SSLError as error:
             print 'Problem with connecting to this url:'
             print url
             print 'Problem:'
-            print e
+            print error
 
 
 if __name__ == '__main__':

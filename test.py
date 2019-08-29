@@ -9,8 +9,6 @@ from simple_ssl_server import SimpleServer
 
 class TestServer(SimpleServer):
     """Server for tests"""
-    def __init__(self, *args, **kwargs):
-        super(TestServer, self).__init__(*args, **kwargs)
     def get(self, path):
         if path == '/':
             response = """HTTP/1.0 200 OK
@@ -80,6 +78,7 @@ if __name__ == '__main__':
     server_cert = 'certs/server.crt'
     server_key = 'certs/server.key'
     ca = 'certs/CAcert.pem'
+
     server = TestServer(addr, server_cert, server_key, ca, ['/', '/second'])
     server_process = Process(target=server.listen)
     server_process.start()
