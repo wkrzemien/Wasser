@@ -8,7 +8,7 @@ import re
 
 class SimpleServer(object):
     """Class for receiving and answering data from TLS connection"""
-    def __init__(self, addr, cert, key, CA, path_array):
+    def __init__(self, addr, cert, key, CA, path_array, verbose=True):
         """Creating socket"""
         self.addr = addr
         self.cert = cert
@@ -17,16 +17,19 @@ class SimpleServer(object):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.bind(addr)
         self.path = path_array
+        self.verbose = verbose
     def listen(self):
         """Listening on socket"""
-        print 'Begin listening\n'
+        if self.verbose:
+            print 'Begin listening\n'
         self.sock.listen(5)
         while True:
             try:
                 self.handle()
             except KeyboardInterrupt:
                 self.close()
-                print '\nConnection closed'
+                if self.verbose:
+                    print '\nConnection closed'
                 sys.exit()
 
     def handle(self):
@@ -40,12 +43,13 @@ class SimpleServer(object):
                                          cert_reqs=ssl.CERT_REQUIRED,
                                          server_side=True)
             data = self.ssl_socket.read()
-            print '\n\nThis person sending message to us - {0}'.format(fromaddr)
-            cert = self.ssl_socket.getpeercert()
-            print 'Certificate of person:'
-            print cert
-            print 'Message:'
-            print data
+            if self.verbose:
+                print '\n\nThis person sending message to us - {0}'.format(fromaddr)
+                cert = self.ssl_socket.getpeercert()
+                print 'Certificate of person:'
+                print cert
+                print 'Message:'
+                print data
             for path in self.path:
                 if re.search('^GET {0} HTTP/1.1'.format(path), data):
                     self.get(path)
@@ -54,10 +58,11 @@ class SimpleServer(object):
                     self.post(path)
             self.ssl_socket.close()
         except ssl.SSLError as e:
-            print 'Problem with connection from this addr:\n'
-            print fromaddr
-            print 'Problem:\n'
-            print e
+            pass
+#            print 'Problem with connection from this addr:\n'
+#            print fromaddr
+#            print 'Problem:\n'
+#            print e
     def close(self):
         """Close socket"""
         self.sock.close()

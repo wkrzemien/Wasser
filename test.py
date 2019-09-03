@@ -44,7 +44,8 @@ class TestWasserRequest(unittest.TestCase):
     def setUp(self):
         self.request = Wasser('certs/user.crt', 'certs/user.key', 'certs/CAcert.pem')
     def test_post_json_success(self):
-        """Test for POST application/json success"""
+        """Test for POST application/json success\nNormal certificate, normal
+        CA for checking server certificate\n"""
         test_json = {'wasser':'stein'}
         json_string = json.dumps(test_json)
         message_len = len(json_string)
@@ -52,14 +53,16 @@ class TestWasserRequest(unittest.TestCase):
         wasser_post_json_response = self.request.post('https://localhost:1027/', test_json)
         self.assertEqual(expecting_response, wasser_post_json_response)
     def test_post_text_success(self):
-        """Test for POST text/plain success"""
+        """Test for POST text/plain success\nNormal certificate, normal CA for
+        checking server certificate\n"""
         message = 'How are you'
         message_len = len(message)
         expecting_response = "HTTP/1.0 200 OK\nContent-Type: text/plain\nContent-Length: {0}\n\n{1}".format(message_len, message)
         wasser_post_text_response = self.request.post('https://localhost:1027/', message)
         self.assertEqual(expecting_response, wasser_post_text_response)
     def test_get_success(self):
-        """Test for GET */* success"""
+        """Test for GET */* success\nNormal certificate, normal CA for checking
+        server certificate\n"""
         expecting_response = """HTTP/1.0 200 OK
                        Content-Type: text/html
 
@@ -69,6 +72,12 @@ class TestWasserRequest(unittest.TestCase):
                        """
         wasser_get_response = self.request.get('https://localhost:1027/')
         self.assertEqual(expecting_response, wasser_get_response)
+    def test_get_fail(self):
+        """Test for GET fail\n"""
+        request = Wasser('certs/user.crt', 'certs/user.key',
+                         'certs/CA_fake_cert.pem')
+        response = request.get('https://localhost:1027/')
+        self.assertEqual(response, None)
     def tearDown(self):
         pass
 
@@ -79,7 +88,8 @@ if __name__ == '__main__':
     server_key = 'certs/server.key'
     ca = 'certs/CAcert.pem'
 
-    server = TestServer(addr, server_cert, server_key, ca, ['/', '/second'])
+    server = TestServer(addr, server_cert, server_key, ca, ['/', '/second'],
+                        False)
     server_process = Process(target=server.listen)
     server_process.start()
     sleep(1)
