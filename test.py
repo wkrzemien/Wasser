@@ -3,7 +3,8 @@ from multiprocessing import Process
 from time import sleep
 import unittest
 import json
-from wasser import Wasser
+import ssl
+from wasser import Wasser, RequestException
 from simple_ssl_server import SimpleServer
 
 
@@ -72,12 +73,16 @@ class TestWasserRequest(unittest.TestCase):
                        """
         wasser_get_response = self.request.get('https://localhost:1027/')
         self.assertEqual(expecting_response, wasser_get_response)
-    def test_get_fail(self):
-        """Test for GET fail\n"""
+    def test_get_fail_fake_CA(self):
+        """Test for GET fail, fake CA to verify server certificate\n"""
         request = Wasser('certs/user.crt', 'certs/user.key',
                          'certs/CA_fake_cert.pem')
-        response = request.get('https://localhost:1027/')
-        self.assertEqual(response, None)
+        self.assertRaises(RequestException, request.get, 'https://localhost:1027')
+    def test_get_fail_fake_cert(self):
+        """Test for GET fail, fake certificate to be verified by server CA\n"""
+        request = Wasser('certs/fake_user.crt', 'certs/fake_user.key',
+                         'certs/CAcert.pem')
+        self.assertRaises(RequestException, request.get, 'https://localhost:1027')
     def tearDown(self):
         pass
 

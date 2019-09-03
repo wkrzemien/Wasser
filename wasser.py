@@ -11,6 +11,18 @@ import re
 from urlparse import urlparse
 
 
+
+class RequestException(Exception):
+    """Exception for requests"""
+    def __init__(self, url, message):
+        self.url = url
+        self.message = message
+    def __str__(self):
+        return '\nProblem with connecting to this url:\n{0}\nProblem:\n{1}'.format(self.url, self.message)
+if __name__ == '__main__':
+    print '\n'
+    raise RequestException('https://localhost:1027', 'Certificate validy fail')
+
 class Response(object):
     """Class for representation of server response, and manipulating data in it"""
     def __init__(self, data):
@@ -36,6 +48,9 @@ class Response(object):
         self.server = re.search('Server:(.*)', self.head).group(1)
     def __str__(self):
         return "Headers:\n{0}\nBody:\n{1}".format(self.head, self.body)
+
+
+
 class Wasser(object):
     """Class to create https requests for Python 2.6"""
     def __init__(self, user_cert, user_key, ca_cert):
@@ -95,10 +110,8 @@ class Wasser(object):
 
             return data #Response(data)
         except ssl.SSLError as error:
-            print 'Problem with connecting to this url:'
-            print url
-            print 'Problem:'
-            print error
+            error_list = error.strerror.split(':')
+            raise RequestException(url, error_list[-1])
     def post(self, url, message):
         """
            POST request, provide url and message to post
