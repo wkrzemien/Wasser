@@ -46,7 +46,7 @@ class Wasser(object):
         for filename in [user_cert, user_key, ca_cert]:
             try:
                 with open(filename) as test_file:
-                    print '{0} exists'.format(filename)
+                    pass
             except IOError:
                 raise IOError('This %s cannot be accessed' %  filename)
         self.user_cert = user_cert
