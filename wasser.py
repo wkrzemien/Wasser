@@ -19,9 +19,6 @@ class RequestException(Exception):
         self.message = message
     def __str__(self):
         return '\nProblem with connecting to this url:\n{0}\nProblem:\n{1}'.format(self.url, self.message)
-if __name__ == '__main__':
-    print '\n'
-    raise RequestException('https://localhost:1027', 'Certificate validy fail')
 
 class Response(object):
     """Class for representation of server response, and manipulating data in it"""
@@ -112,6 +109,8 @@ class Wasser(object):
         except ssl.SSLError as error:
             error_list = error.strerror.split(':')
             raise RequestException(url, error_list[-1])
+        except socket.error as error:
+            raise RequestException(url, error.strerror)
     def post(self, url, message):
         """
            POST request, provide url and message to post
@@ -149,21 +148,16 @@ class Wasser(object):
             ssl_socket.close()
             return data #Response(data)
         except ssl.SSLError as error:
-            print 'Problem with connecting to this url:'
-            print url
-            print 'Problem:'
-            print error
-
+            error_list = error.strerror.split(':')
+            raise RequestException(url, error_list[-1])
+        except socket.error as error:
+            raise RequestException(url, error.strerror)
 
 if __name__ == '__main__':
     test_json = {'wasser':'stein'}
     new_request = Wasser('certs/user.crt', 'certs/user.key', 'certs/CAcert.pem')
     fake_request = Wasser('certs/fake_user.crt', 'certs/fake_user.key',
                           'certs/CA_fake_cert.pem')
-    #print '\nPOST request\n'
-    #print new_request.post('https://localhost:1027/', test_json)
-    #print '\nPOST request\n'
-    #print new_request.post('https://localhost:1027/', 'Hello server')
     print '\nGET request, normal certificate\n'
     print new_request.get('https://localhost:1027/')
     print '\nGET request, fake certificate\n'
