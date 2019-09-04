@@ -51,7 +51,7 @@ class TestWasserRequest(unittest.TestCase):
         json_string = json.dumps(test_json)
         message_len = len(json_string)
         expecting_response = "HTTP/1.0 200 OK\nContent-Type: text/plain\nContent-Length: {0}\n\n{1}".format(message_len, json_string)
-        wasser_post_json_response = self.request.post('https://localhost:1027/', test_json)
+        wasser_post_json_response = self.request.post('https://localhost:1207/', test_json)
         self.assertEqual(expecting_response, wasser_post_json_response)
     def test_post_text_success(self):
         """Test for POST text/plain success\nNormal certificate, normal CA for
@@ -59,7 +59,7 @@ class TestWasserRequest(unittest.TestCase):
         message = 'How are you'
         message_len = len(message)
         expecting_response = "HTTP/1.0 200 OK\nContent-Type: text/plain\nContent-Length: {0}\n\n{1}".format(message_len, message)
-        wasser_post_text_response = self.request.post('https://localhost:1027/', message)
+        wasser_post_text_response = self.request.post('https://localhost:1207/', message)
         self.assertEqual(expecting_response, wasser_post_text_response)
     def test_get_success(self):
         """Test for GET */* success\nNormal certificate, normal CA for checking
@@ -71,24 +71,60 @@ class TestWasserRequest(unittest.TestCase):
                        <head>Test message ...</head>
                        <body>Hello there, general Kenobi</body>
                        """
-        wasser_get_response = self.request.get('https://localhost:1027/')
+        wasser_get_response = self.request.get('https://localhost:1207/')
         self.assertEqual(expecting_response, wasser_get_response)
     def test_get_fail_fake_CA(self):
         """Test for GET fail, fake CA to verify server certificate\n"""
         request = Wasser('certs/user.crt', 'certs/user.key',
                          'certs/CA_fake_cert.pem')
-        self.assertRaises(RequestException, request.get, 'https://localhost:1027')
+        self.assertRaises(RequestException, request.get,
+                          'https://localhost:1207/')
     def test_get_fail_fake_cert(self):
         """Test for GET fail, fake certificate to be verified by server CA\n"""
         request = Wasser('certs/fake_user.crt', 'certs/fake_user.key',
                          'certs/CAcert.pem')
-        self.assertRaises(RequestException, request.get, 'https://localhost:1027')
+        self.assertRaises(RequestException, request.get,
+                          'https://localhost:1207/')
+    def test_post_fail_fake_CA(self):
+        """Test for POST fail, fake CA to verify server certificate\n"""
+        request = Wasser('certs/user.crt', 'certs/user.key',
+                         'certs/CA_fake_cert.pem')
+        self.assertRaises(RequestException, request.post,
+                          'https://localhost:1207/', 'Hello there')
+    def test_post_fail_fake_cert(self):
+        """Test for POST fail, fake certificate to be verified by server CA\n"""
+        request = Wasser('certs/fake_user.crt', 'certs/fake_user.key',
+                         'certs/CAcert.pem')
+        self.assertRaises(RequestException, request.post,
+                          'https://localhost:1207/', 'Hello there')
+    def test_post_fail(self):
+        """Test for POST fail, wrong url\n"""
+        request = Wasser('certs/fake_user.crt', 'certs/fake_user.key',
+                         'certs/CAcert.pem')
+        self.assertRaises(RequestException, request.post,
+                          'https://another:1207/', 'Hello there')
+    def test_get_fail(self):
+        """Test for GET fail, wrong url\n"""
+        request = Wasser('certs/fake_user.crt', 'certs/fake_user.key',
+                         'certs/CAcert.pem')
+        self.assertRaises(RequestException, request.get, 'https://somesite:1207/')
+    def tearDown(self):
+        pass
+
+class TestWasserIO(unittest.TestCase):
+    """Testing other wasser functions: __init__, create()"""
+    def setUp(self):
+        pass
+    def test_io_error(self):
+        """Testing raising IOError for creating instance of Wasser class with
+        fake parameters """
+        self.failUnlessRaises(IOError, Wasser, 'some_cert', 'some_key', 'some_CA')
     def tearDown(self):
         pass
 
 
 if __name__ == '__main__':
-    addr = ('127.0.0.1', 1027)
+    addr = ('127.0.0.1', 1207)
     server_cert = 'certs/server.crt'
     server_key = 'certs/server.key'
     ca = 'certs/CAcert.pem'
@@ -100,6 +136,7 @@ if __name__ == '__main__':
     sleep(1)
 
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestWasserRequest)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(TestWasserIO))
+    unittest.TextTestRunner(verbosity=3).run(suite)
 
     server_process.terminate()
