@@ -78,12 +78,12 @@ class TestServer(SimpleServer):
     def get(self, path):
         if path == '/':
             response = """HTTP/1.0 200 OK
-                       Content-Type: text/html
+Content-Type: text/html
 
 
-                       <head>Test message ...</head>
-                       <body>Hello there, general Kenobi</body>
-                       """
+<head>Test message ...</head>
+<body>Hello there, general Kenobi</body>"""
+            another_response = 'HTTP/1.0 200 OK\nContent-Type: text/html\r\n\r\n<head>Test message...</head><body>Hello there general Kenobi</body>'
             self.ssl_socket.send(response)
         elif path == '/second':
             reponse = """HTTP/1.1 200 OK
