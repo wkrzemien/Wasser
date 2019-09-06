@@ -1,0 +1,11 @@
+language: python
+python: 
+  - "2.7"
+env:
+  matrix:
+    - CHECK=pytest
+    - CHECK=pylint
+install:
+  - "pip install --upgrade pip"
+script:
+  - python test.py

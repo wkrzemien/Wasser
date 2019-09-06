@@ -11,7 +11,6 @@ import re
 from urlparse import urlparse
 
 
-
 class RequestException(Exception):
     """Exception for requests"""
     def __init__(self, url, message):
