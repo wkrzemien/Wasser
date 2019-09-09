@@ -1,101 +1,93 @@
 Module wasser
-=============
-
+============
 Wasser module is created for providing https requests for Python 2.6,
 where you don't have pyOpenSSL, cryptography.
-Instead this module uses ssl wrapped sockets
+Here  SSL wrapper for socket is used.
 
+Functions
+---------
+### get(url, cert, CA='certs/CAcert.pem', verify=True)
+    GET method for https request, please provide:
+    url - url which you want to connect,
+    cert - tuple of your certificate and key, in this order
+    verify - do you want to verify server certificate,
+    CA - CA certificate which you want to use in verifying (only if verify = True)
+
+### post(url, data, cert, CA='certs/CAcert.pem', verify=True)
+    POST method for https request, please provide:
+    url - url which you want to connect,
+    data - message to POST,
+    cert - tuple of your certificate and key, in this order
+    verify - do you want to verify server certificate,
+    CA - CA certificate which you want to use in verifying (only if verify = True)
 
 Classes
-=======
-Response 
---------
-Class for representation of server response, and manipulating data in it
+-------
+### RequestException 
+    Exception for requests
 
-### Ancestors (in MRO)
+    Ancestors (in MRO)
+    ------------------
+    wasser.RequestException
+    exceptions.Exception
+    exceptions.BaseException
+    __builtin__.object
 
-wasser.Response
+    Class variables
+    ---------------
+    args
 
-### Instance variables
+    Instance variables
+    ------------------
+    message
+
+    url
+
+    Methods
+    -------
+    __init__(self, url, message)
+
+### Response 
+    Class for representation of server response, and manipulating data in it
+
+    Ancestors (in MRO)
+    ------------------
+    wasser.Response
+    __builtin__.object
+
+    Instance variables
+    ------------------
+    body
+
+    head
+
+    headers
+
+    Methods
+    -------
+    __init__(self, data)
+        Creating and parsing response on
+        headers,
+        body,
+        code of response,
+        date of response,
+        content_length,
+        content_type,
+        encoding,
+        server
 
 
-head - headers of http response
-
-body - body of http response
-
-code - code of http response
-
-date - date of http response
-
-content_length - length of body 
-
-content_type - type of body
-
-encoding - encoding of body
-
-server - type of server, from which we get response
-
-### Methods
-```python
-__init__(self, data)
-```
-
-Creating and parsing response on
--   headers,
--   body,
--   code of response,
--   date of response,
--   content_length,
--   content_type,
--   encoding,
--   server
-
-
-
-Wasser
-------
-
-Class to create https requests for Python 2.6
-
-
-### Instance variables
-
-ca - path to your CA certificate for checking server certificate
-
-user_cert - path to your certificate for connection
-
-user_key - path to your key for connection
-
-### Methods
-```python
-__init__(self, user_cert, user_key, ca)
-```
-For creating https request you need to provide path for your certificate and key
-
-```python
-get(self, url)
-```
-GET request, provide fully qualified url
-      as example - `https://localhost:1027/`
-      not `localhost:1027/`
-
-```python      
-post(self, url, message)
-```
-POST request, provide url(as in ```get(self, url)``` method) and message to post
-if type of message is dict -> request Content-Type will be application/json, else request will post text/plain
 
 ### Example of usage
 ```python
-from wasser import Wasser
-request = Wasser('test.crt', 'test.key', 'CAtest.crt')
-get_response = request.get('https://example.com/')
+import wasser as request
+get_response = request.get('https://example.com/', ('certs/mycert.crt', 'certs/mycert.key'))
 print get_response
 text_message = 'Hello'
-post_text_response = request.post('https://example.com/', text_message)
+post_text_response = request.post('https://example.com/', text_message, ('certs/mycert.crt', 'certs/mycert.key'), 'certs/MyCAcert.pem')
 print post_text_responce
 json_message = {'key':'value'}
-post_json_response = request.post('https://example.com/', json_message)
+post_json_response = request.post(url='https://example.com/', data=json_message, cert=('certs/mycert.crt', 'certs/mycert.key'), verify=False)
 print post_json_responce
 
 ```
