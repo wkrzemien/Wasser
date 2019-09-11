@@ -4,8 +4,7 @@ python:
 env:
   matrix:
     - CHECK=pytest
-    - CHECK=pylint
 install:
   - "pip install --upgrade pip"
 script:
-  - python test.py
+  - pytest
