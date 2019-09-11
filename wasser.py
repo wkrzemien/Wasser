@@ -14,6 +14,7 @@ from urlparse import urlparse
 class RequestException(Exception):
     """Exception for requests"""
     def __init__(self, url, message):
+        super(RequestException, self).__init__(url, message)
         self.url = url
         self.message = message
     def __str__(self):
@@ -43,13 +44,13 @@ class Response(object):
                             'encoding':'charset=(.*)\n',
                             'server':'Server:(.*)'
                            }
-        self.headers={}
+        self.headers = {}
         for key, regex in values_and_regex.items():
-            res=re.search(regex, self.head)
+            res = re.search(regex, self.head)
             if res is None:
-                self.headers[key]=None
+                self.headers[key] = None
             else:
-                self.headers[key]=res.group(0)
+                self.headers[key] = res.group(0)
 
         #self.code = re.search('(.*)\nDate', self.head).group(1)
         #self.date = re.search('\nDate: (.*)\n', self.head).group(1)
@@ -57,6 +58,24 @@ class Response(object):
         #self.content_length = re.search('\nContent-Length:(.*)\n', self.head).group(1)
         #self.encoding = re.search('charset=(.*)\n', self.head).group(1)
         #self.server = re.search('Server:(.*)', self.head).group(1)
+    def code(self):
+        '''Return message code'''
+        return self.headers['code']
+    def date(self):
+        '''Return response date'''
+        return self.headers['date']
+    def content_type(self):
+        '''Return response content_type'''
+        return self.headers['content_type']
+    def content_length(self):
+        '''Return response content length'''
+        return self.headers['content_length']
+    def encoding(self):
+        '''Return response encoding'''
+        return self.headers['encoding']
+    def server(self):
+        '''Resturn response server'''
+        return self.headers['server']
     def __str__(self):
         return "Headers:\n{0}\nBody:\n{1}".format(self.head, self.body)
 
@@ -84,8 +103,7 @@ def post(url, data, cert, CA='certs/CAcert.pem', verify=True):
     if verify:
         for filename in [user_cert, user_key, CA]:
             try:
-                with open(filename) as test_file:
-                    pass
+                open(filename)
             except IOError:
                 raise IOError('This %s cannot be accessed' %  filename)
         ssl_socket = ssl.wrap_socket(unwrap_socket,
@@ -139,8 +157,7 @@ def get(url, cert, CA='certs/CAcert.pem', verify=True):
     if verify:
         for filename in [user_cert, user_key, CA]:
             try:
-                with open(filename) as test_file:
-                    pass
+                open(filename)
             except IOError:
                 raise IOError('This %s cannot be accessed' %  filename)
         ssl_socket = ssl.wrap_socket(unwrap_socket,
