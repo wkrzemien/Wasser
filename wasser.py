@@ -95,8 +95,12 @@ def post(url, data, cert, CA='certs/CAcert.pem', verify=True):
     location = parsed_url.netloc
     path = parsed_url.path
     index_of_colon = location.find(':')
-    host = location[:index_of_colon]
-    port = int(location[index_of_colon+1:])
+    if index_of_colon != -1:
+        host = location[:index_of_colon]
+        port = int(location[index_of_colon+1:])
+    else:
+        port = 443
+        host = location
     user_cert = cert[0]
     user_key = cert[1]
     unwrap_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
