@@ -3,6 +3,7 @@ from multiprocessing import Process
 from time import sleep
 import unittest
 import json
+import sys
 import ssl
 import wasser
 from simple_ssl_server import SimpleServer
@@ -148,6 +149,7 @@ if __name__ == '__main__':
 
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestWasserRequest)
     suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(TestWasserIO))
-    unittest.TextTestRunner(verbosity=3).run(suite)
+    test_result = unittest.TextTestRunner(verbosity=3).run(suite)
 
     server_process.terminate()
+    sys.exit(not test_result.wasSuccessful())

@@ -3,8 +3,8 @@ python:
   - "2.7"
 env:
   matrix:
-    - CHECK=pytest
+    - CHECK=python test_wasser.py
 install:
   - "pip install --upgrade pip"
 script:
-  - pytest
+  - python test_wasser.py
