@@ -87,8 +87,7 @@ class TestWasserRequest(unittest.TestCase):
         """Test for GET fail, fake certificate to be verified by server CA\n"""
         self.assertRaises(wasser.RequestException, wasser.get,
                           'https://localhost:1207/',
-                          ('certs/fake_user.crt', 'certs/fake_user.key'),
-                          'certs/CAcert.pem')
+                          ('certs/fake_user.crt', 'certs/fake_user.key'))
     def test_post_fail_fake_CA(self):
         """Test for POST fail, fake CA to verify server certificate\n"""
         self.assertRaises(wasser.RequestException, wasser.post,
@@ -101,15 +100,13 @@ class TestWasserRequest(unittest.TestCase):
         self.assertRaises(wasser.RequestException, wasser.post,
                           'https://localhost:1207/',
                           'Hello there',
-                          ('certs/fake_user.crt', 'certs/fake_user.key'),
-                          'certs/CAcert.pem')
+                          ('certs/fake_user.crt', 'certs/fake_user.key'))
     def test_post_fail(self):
         """Test for POST fail, wrong url\n"""
         self.assertRaises(wasser.RequestException, wasser.post,
                           'https://localhostish:1207/',
                           'Hello there',
-                          ('certs/user.crt', 'certs/user.key'),
-                          'certs/CAcert.pem')
+                          ('certs/user.crt', 'certs/user.key'),)
     def test_get_fail(self):
         """Test for GET fail, wrong url\n"""
         self.assertRaises(wasser.RequestException, wasser.get,
@@ -126,11 +123,13 @@ class TestWasserIO(unittest.TestCase):
     def test_get_io_error(self):
         """Testing raising IOError for invoking get method with
         fake parameters """
-        self.failUnlessRaises(IOError, wasser.get, 'https://localhost:1207/', 'some_cert', 'some_key', 'some_CA')
+        self.failUnlessRaises(IOError, wasser.get, 'https://localhost:1207/',
+                              ('some_cert', 'some_key'), 'some_CA')
     def test_post_io_error(self):
         """Testing raising IOError for invoking post method with
         fake parameters """
-        self.failUnlessRaises(IOError, wasser.post, 'https://localhost:1207/', 'some_cert', 'some_key', 'some_CA')
+        self.failUnlessRaises(IOError, wasser.post, 'https://localhost:1207/',
+                              ('some_cert', 'some_key'), 'some_CA')
     def tearDown(self):
         pass
 

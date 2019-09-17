@@ -82,14 +82,14 @@ class Response(object):
 
 
 
-def post(url, data, cert, CA='certs/CAcert.pem', verify=True):
+def post(url, data, cert, verify='certs/CAcert.pem'):
     """
     POST method for https request, please provide:
     url - url which you want to connect,
     data - message to POST,
     cert - tuple of your certificate and key, in this order
     verify - do you want to verify server certificate,
-    CA - CA certificate which you want to use in verifying (only if verify = True)
+    verify - verify certificate which you want to use in verifying (only if isinstance(verify, str) = True)
     """
     parsed_url = urlparse(url)
     location = parsed_url.netloc
@@ -104,8 +104,8 @@ def post(url, data, cert, CA='certs/CAcert.pem', verify=True):
     user_cert = cert[0]
     user_key = cert[1]
     unwrap_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    if verify:
-        for filename in [user_cert, user_key, CA]:
+    if isinstance(verify, str):
+        for filename in [user_cert, user_key, verify]:
             try:
                 open(filename)
             except IOError:
@@ -113,7 +113,7 @@ def post(url, data, cert, CA='certs/CAcert.pem', verify=True):
         ssl_socket = ssl.wrap_socket(unwrap_socket,
                                      certfile=user_cert,
                                      keyfile=user_key,
-                                     ca_certs=CA,
+                                     ca_certs=verify,
                                      cert_reqs=ssl.CERT_REQUIRED)
     else:
         ssl_socket = ssl.wrap_socket(unwrap_socket,
@@ -141,13 +141,13 @@ def post(url, data, cert, CA='certs/CAcert.pem', verify=True):
     ssl_socket.close()
     return response
 
-def get(url, cert, CA='certs/CAcert.pem', verify=True):
+def get(url, cert, verify='certs/CAcert.pem'):
     """
     GET method for https request, please provide:
     url - url which you want to connect,
     cert - tuple of your certificate and key, in this order
     verify - do you want to verify server certificate,
-    CA - CA certificate which you want to use in verifying (only if verify = True)
+    verify - verify certificate which you want to use in verifying (only if isinstance(verify, str) = True)
     """
     parsed_url = urlparse(url)
     location = parsed_url.netloc
@@ -158,8 +158,8 @@ def get(url, cert, CA='certs/CAcert.pem', verify=True):
     user_cert = cert[0]
     user_key = cert[1]
     unwrap_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    if verify:
-        for filename in [user_cert, user_key, CA]:
+    if isinstance(verify, str):
+        for filename in [user_cert, user_key, verify]:
             try:
                 open(filename)
             except IOError:
@@ -167,7 +167,7 @@ def get(url, cert, CA='certs/CAcert.pem', verify=True):
         ssl_socket = ssl.wrap_socket(unwrap_socket,
                                      certfile=user_cert,
                                      keyfile=user_key,
-                                     ca_certs=CA,
+                                     ca_certs=verify,
                                      cert_reqs=ssl.CERT_REQUIRED)
     else:
         ssl_socket = ssl.wrap_socket(unwrap_socket,
