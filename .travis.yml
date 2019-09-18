@@ -1,0 +1,10 @@
+language: python
+python: 
+  - "2.7"
+env:
+  matrix:
+    - CHECK=python test_wasser.py
+install:
+  - "pip install --upgrade pip"
+script:
+  - python test_wasser.py
